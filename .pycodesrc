@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# conda environments
+alias croot="conda deactivate"
+alias py3k=". activate py3k"
+alias tcc=". activate tcc"
+alias pygram=". activate pygram"
+
+# repo dir
+alias pycodes="cd ~/pycodes/modules/ && pwd"
+
+# Jupyter
+alias juno="jupyter notebook"
+
+mega-sena() {
+    (py3k; python -c "import random; print(random.sample(range(1,61),6))";)
+}
+
+# update all pip packages in conda env
+pipupdate() {
+    local list
+    list="$(conda list | grep '<pip>' | egrep -o '^[^ ]+' | tr '\n' ' ')"
+    [ -n "$list" ] && eval "pip install -U $list"
+}
+
+# list pip dependencies
+pipdeps() {
+    # run:
+    # $ pipdeps <package_name>
+
+    local PACKAGE TMP_DIR
+
+    if [[ -n "$1" ]]; then
+        PACKAGE="$1"
+        TMP_DIR=$(mktemp -d)
+
+        pip download $PACKAGE -d $TMP_DIR --no-binary :all: \
+        | grep Collecting \
+        | cut -d' ' -f2 \
+        | grep -v $PACKAGE
+
+        rm -r $TMP_DIR
+    else
+        echo 'Error: no package name was given'
+    fi
+}
